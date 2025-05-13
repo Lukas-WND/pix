@@ -1,0 +1,16 @@
+services:
+  db:
+    image: mysql
+    restart: unless-stopped
+    ports:
+      - 33065:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=database
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=admin
+    volumes:
+      - db:/var/lib/mysql
+
+volumes:
+  db:
