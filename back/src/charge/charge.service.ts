@@ -39,6 +39,7 @@ export class ChargeService {
       id_transaction: preCharge.identificador_movimento,
       due_date: preCharge.vencimento,
       status: Status.CREATED,
+      qr_code: apiResponse.data.qrcode
     });
 
     await this.chargeRepository.save(charge);
@@ -88,8 +89,10 @@ export class ChargeService {
       : data.id_invoice_pix_documento;
   }
 
-  async findAll() {
-    return await this.chargeRepository.find();
+  async findAll(userId: string, token: string) {
+    const allChargesOfUser = await this.chargeRepository.find();
+
+    return allChargesOfUser;
   }
 
   async findOne(id: string) {

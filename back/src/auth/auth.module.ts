@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { HttpModule } from '@nestjs/axios';
 import { UserModule } from 'src/user/user.module';
+import { AtStrategy } from './strategies/at.strategy';
+import { RtStrategy } from './strategies/rt.strategy';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [HttpModule.register({ timeout: 30000, maxRedirects: 5 }), UserModule],
+  imports: [JwtModule.register({}), UserModule],
   controllers: [AuthController],
-  providers: [AuthService],
-  exports: [AuthService],
+  providers: [AuthService, AtStrategy, RtStrategy],
 })
 export class AuthModule {}

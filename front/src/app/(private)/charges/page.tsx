@@ -1,3 +1,4 @@
+import { ChargesList } from "./components/charges-list";
 import { CreateChargeDialog } from "./components/create-charge-dialog";
 
 export default function ChargesPage() {
@@ -8,7 +9,7 @@ export default function ChargesPage() {
                 <CreateChargeDialog />
             </div>
             <section className="mt-8 w-full">
-                tabela
+                <ChargesList />
             </section>
         </main>
     )

@@ -1,7 +1,10 @@
+import { User } from 'src/user/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -68,6 +71,13 @@ export class Charge {
 
   @Column({ nullable: true })
   customer_doc_value?: string;
+
+  @Column({ type: 'blob', nullable: false })
+  qr_code: string;
+
+  @ManyToOne(() => User, (user) => user.charges)
+  @JoinColumn({name: 'id_user'})
+  user: string;
 
   @CreateDateColumn()
   created_at: Date;

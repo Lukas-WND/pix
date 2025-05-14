@@ -27,8 +27,9 @@ export class ChargeController {
   }
 
   @Get()
-  findAll() {
-    return this.chargeService.findAll();
+  findAll(@Req() req: Request) {
+    const { token } = req.cookies;
+    return this.chargeService.findAll("d1fb8f22-3030-11f0-a6dc-0242ac170002", token);
   }
 
   @Get(':id')

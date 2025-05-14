@@ -1,8 +1,10 @@
 import { Exclude } from 'class-transformer';
+import { Charge } from 'src/charge/entities/charge.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -25,6 +27,9 @@ export class User {
   @Exclude()
   password: string;
 
+  @Column({ nullable: true })
+  hashedRt: string;
+
   @Column({ nullable: false, unique: true })
   @Exclude()
   client_id: string;
@@ -33,8 +38,11 @@ export class User {
   @Exclude()
   private_key: string;
 
+  @OneToMany(() => Charge, (charge) => charge.user)
+  charges: Charge[];
+
   @CreateDateColumn()
-  created_ar: Date;
+  created_at: Date;
 
   @UpdateDateColumn()
   updated_at: Date;
