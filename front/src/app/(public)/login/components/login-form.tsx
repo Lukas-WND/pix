@@ -49,8 +49,9 @@ export function LoginForm({
       toast.success("Login realizado com sucesso!");
       router.replace("/home");
     },
-    onError: (err) => {
-      toast.error(err.message);
+    onError: (err: any) => {
+      console.log(err);
+      toast.error(err.response.data.message);
     },
   });
 
@@ -78,7 +79,7 @@ export function LoginForm({
               <FormItem>
                 <FormLabel>Nome de usuário</FormLabel>
                 <FormControl>
-                  <Input id="username" placeholder="user.name" {...field} />
+                  <Input placeholder="user.name" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -91,7 +92,7 @@ export function LoginForm({
               <FormItem>
                 <FormLabel>Senha</FormLabel>
                 <FormControl>
-                  <Input id="username" placeholder="exemplo123" {...field} />
+                  <Input placeholder="exemplo123" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

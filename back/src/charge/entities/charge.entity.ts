@@ -6,13 +6,13 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-enum Status {
+export enum Status {
   CREATED = 0,
   EXPIRED = 1,
   PAID = 2,
 }
 
-enum Type {
+export enum Type {
   STATIC = 0,
   DINAMIC = 1,
 }
@@ -35,7 +35,7 @@ export class Charge {
   @Column({ type: 'int' })
   amount: number;
 
-  @Column()
+  @Column({ nullable: false })
   description: string;
 
   @Column({ nullable: false })
