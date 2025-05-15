@@ -77,7 +77,7 @@ export class Charge {
 
   @ManyToOne(() => User, (user) => user.charges)
   @JoinColumn({name: 'id_user'})
-  user: string;
+  user: User;
 
   @CreateDateColumn()
   created_at: Date;

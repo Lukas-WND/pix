@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
@@ -9,49 +13,78 @@ import { Charge } from './entities/charge.entity';
 import { CreateChargeDTO } from './dto/create-charge.dto';
 import { UpdateChargeDto } from './dto/update-charge.dto';
 import { Type, Status } from './entities/charge.entity';
+import { UserService } from 'src/user/user.service';
+import { CanviService } from 'src/canvi/canvi.service';
+import { PreCharge } from 'src/canvi/types/pre-charge.type';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class ChargeService {
   constructor(
     @InjectRepository(Charge)
     private readonly chargeRepository: Repository<Charge>,
-    private readonly httpService: HttpService,
+    private readonly canviService: CanviService,
+    private readonly userService: UserService,
   ) {}
 
-  async create(createChargeDTO: CreateChargeDTO, token: string) {
-    const preCharge = this.mapToPreCharge(createChargeDTO);
+  private async getUser(userId: string): Promise<User> {
+    const user = await this.userService.findOne(userId);
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+    return user;
+  }
 
-    const apiResponse = await this.sendChargeToPixApi(preCharge, token);
+  async create(createChargeDTO: CreateChargeDTO, userId: string) {
+    const user = await this.getUser(userId);
+
+    console.log('user: ', user)
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    const token = await this.canviService.token(
+      user.client_id,
+      user.private_key,
+    );
+    const pre_charge = this.mapToPreCharge(createChargeDTO);
+
+    const generated_pix = await this.canviService.generatePix(
+      pre_charge,
+      token,
+    );
 
     const id_pix = this.extractPixId(
-      preCharge.tipo_transacao,
-      apiResponse.data,
+      pre_charge.tipo_transacao,
+      generated_pix.data,
     );
 
     const charge = this.chargeRepository.create({
-      amount: preCharge.valor,
+      amount: pre_charge.valor,
       id_invoice: id_pix,
       type:
-        preCharge.tipo_transacao === 'pixCashin' ? Type.DINAMIC : Type.STATIC,
-      description: preCharge.descricao,
-      instruction: preCharge.texto_instrucao,
-      id_external: preCharge.identificador_externo,
-      id_transaction: preCharge.identificador_movimento,
-      due_date: preCharge.vencimento,
+        pre_charge.tipo_transacao === 'pixCashin' ? Type.DINAMIC : Type.STATIC,
+      description: pre_charge.descricao,
+      instruction: pre_charge.texto_instrucao,
+      id_external: pre_charge.identificador_externo,
+      id_transaction: pre_charge.identificador_movimento,
+      due_date: pre_charge.vencimento,
       status: Status.CREATED,
-      qr_code: apiResponse.data.qrcode
+      qr_code: generated_pix.data.qrcode,
+      user: user,
     });
 
     await this.chargeRepository.save(charge);
 
     return {
       id_invoice: charge.id_invoice,
-      brcode: apiResponse.data.brcode,
-      qrcode: apiResponse.data.qrcode,
+      brcode: generated_pix.data.brcode,
+      qrcode: generated_pix.data.qrcode,
     };
   }
 
-  private mapToPreCharge(dto: CreateChargeDTO) {
+  private mapToPreCharge(dto: CreateChargeDTO): PreCharge {
     return {
       valor: dto.amount,
       vencimento: dto.due_date,
@@ -64,35 +97,19 @@ export class ChargeService {
     };
   }
 
-  private async sendChargeToPixApi(preCharge: any, token: string) {
-    try {
-      const response = await firstValueFrom(
-        this.httpService.post('/pix', preCharge, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }),
-      );
-      return response.data;
-    } catch (error) {
-      console.error(
-        'Erro ao criar cobrança no PIX API:',
-        error.response?.data || error.message,
-      );
-      throw new InternalServerErrorException('Falha ao criar cobrança no PIX');
-    }
-  }
-
   private extractPixId(tipo_transacao: string, data: any): number {
     return tipo_transacao === 'pixCashin'
       ? data.id_invoice_pix
       : data.id_invoice_pix_documento;
   }
 
-  async findAll() {
-    const allChargesOfUser = await this.chargeRepository.find();
+  async findAll(userId: string) {
+    const charges = await this.chargeRepository.find({
+      where: { user: { id: userId } },
+      relations: ['user'],
+    });
 
-    return allChargesOfUser;
+    return charges;
   }
 
   async findOne(id: string) {

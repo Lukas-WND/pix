@@ -13,8 +13,8 @@ export function ChargesList() {
 
   return (
     <div>
-      {data?.map((item: any) => (
-        <p>{item.id}</p>
+      {data?.map((item: any, idx: number) => (
+        <p key={idx}>{item.id}</p>
       ))}
     </div>
   );

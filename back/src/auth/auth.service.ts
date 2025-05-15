@@ -10,6 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Tokens } from './types/tokens';
 import { User } from 'src/user/entities/user.entity';
 import { Response } from 'express';
+import { JwtPayload } from './types/payload';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +20,7 @@ export class AuthService {
   ) {}
 
   async getTokens(userId: string, email: string): Promise<Tokens> {
-    const payload = { sub: userId, email };
+    const payload: JwtPayload = { userId, email };
 
     const [at, rt] = await Promise.all([
       await this.jwtService.signAsync(payload, {
@@ -88,7 +89,7 @@ export class AuthService {
     response.cookie('Refresh', refresh_token, {
       httpOnly: true,
       secure: false,
-      sameSite:'lax',
+      sameSite: 'lax',
       expires: expiresRefreshToken,
     });
   }
@@ -116,7 +117,7 @@ export class AuthService {
     try {
       const user = await this.userService.findOne(userId);
       const authenticated = await compare(refreshToken, user?.refresh_token);
-      
+
       if (!authenticated) {
         throw new UnauthorizedException();
       }

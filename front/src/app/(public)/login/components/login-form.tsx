@@ -47,7 +47,7 @@ export function LoginForm({
     mutationFn: login,
     onSuccess: () => {
       toast.success("Login realizado com sucesso!");
-      router.replace("/charges");
+      router.push("/charges");
     },
     onError: (err: any) => {
       console.log(err);

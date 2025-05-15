@@ -24,17 +24,20 @@ export class ChargeController {
   constructor(private readonly chargeService: ChargeService) {}
 
   @Post()
-  @UsePipes(new ZodValidationPipe(CreateChargeSchema))
-  create(@Body() createChargeDto: CreateChargeDTO, @Req() req: Request) {
-    const { token } = req.cookies;
-    return this.chargeService.create(createChargeDto, token);
+  @UseGuards(JwtAuthGuard)
+  create(
+    @Body(new ZodValidationPipe(CreateChargeSchema))
+    createChargeDto: CreateChargeDTO,
+    @CurrentUser() user: User,
+  ) {
+    return this.chargeService.create(createChargeDto, user.id);
   }
 
   @Get()
   @UseGuards(JwtAuthGuard)
   findAll(@CurrentUser() user: User) {
-    console.log(user);
-    return this.chargeService.findAll();
+    console.log(user)
+    return this.chargeService.findAll(user.id);
   }
 
   @Get(':id')

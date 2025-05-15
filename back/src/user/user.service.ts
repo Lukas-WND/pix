@@ -23,7 +23,7 @@ export class UserService {
 
   async findOne(id: string) {
     try {
-      return await this.userRepository.findOne({ where: { id } });
+      return await this.userRepository.findOne({ where: { id }, relations: ['charges'] });
     } catch (Err) {
       throw new NotFoundException('Usuário não encontrado');
     }
