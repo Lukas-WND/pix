@@ -1,4 +1,4 @@
-````markdown
+
 # Integração Pix
 
 Projeto fullstack desenvolvido com NestJS (backend) e Next.js (frontend) para gerenciar cobranças via Pix, utilizando TypeORM com MySQL.
@@ -20,7 +20,6 @@ Projeto fullstack desenvolvido com NestJS (backend) e Next.js (frontend) para ge
 ```bash
 git clone https://github.com/Lukas-WND/pix.git
 cd pix
-````
 
 2. Faça o build e inicie os containers Docker:
 
@@ -136,7 +135,7 @@ O frontend estará disponível em:
 ## Contato
 
 Desenvolvido por Lukas Palheta
-Email: [lukas@example.com](mailto:lukas.wrks@gmail.com)
+Email: [lukas.wrks@gmail.com](mailto:lukas.wrks@gmail.com)
 
 ---
 
