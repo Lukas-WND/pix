@@ -13,7 +13,6 @@ export class CanviService {
     );
 
     const { data } = response;
-    console.log(data);
     return data.token;
   }
 
@@ -26,6 +25,7 @@ export class CanviService {
           },
         }),
       );
+      console.log(response.data);
       return response.data;
     } catch (error) {
       console.error(

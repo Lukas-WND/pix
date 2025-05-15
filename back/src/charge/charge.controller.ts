@@ -30,13 +30,12 @@ export class ChargeController {
     createChargeDto: CreateChargeDTO,
     @CurrentUser() user: User,
   ) {
-    return this.chargeService.create(createChargeDto, user.id);
+    return this.chargeService.create(createChargeDto, user);
   }
 
   @Get()
   @UseGuards(JwtAuthGuard)
   findAll(@CurrentUser() user: User) {
-    console.log(user)
     return this.chargeService.findAll(user.id);
   }
 

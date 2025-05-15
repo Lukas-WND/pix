@@ -50,7 +50,7 @@ export class Charge {
   @Column({ type: 'char', length: 36, unique: true })
   id_transaction: string;
 
-  @Column()
+  @Column({nullable: true})
   due_date: Date;
 
   @Column({

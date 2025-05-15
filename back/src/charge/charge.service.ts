@@ -5,9 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { HttpService } from '@nestjs/axios';
 import { randomUUID } from 'crypto';
-import { firstValueFrom } from 'rxjs';
 
 import { Charge } from './entities/charge.entity';
 import { CreateChargeDTO } from './dto/create-charge.dto';
@@ -27,23 +25,7 @@ export class ChargeService {
     private readonly userService: UserService,
   ) {}
 
-  private async getUser(userId: string): Promise<User> {
-    const user = await this.userService.findOne(userId);
-    if (!user) {
-      throw new NotFoundException('Usuário não encontrado');
-    }
-    return user;
-  }
-
-  async create(createChargeDTO: CreateChargeDTO, userId: string) {
-    const user = await this.getUser(userId);
-
-    console.log('user: ', user)
-
-    if (!user) {
-      throw new NotFoundException('Usuário não encontrado');
-    }
-
+  async create(createChargeDTO: CreateChargeDTO, user: User) {
     const token = await this.canviService.token(
       user.client_id,
       user.private_key,
@@ -87,7 +69,7 @@ export class ChargeService {
   private mapToPreCharge(dto: CreateChargeDTO): PreCharge {
     return {
       valor: dto.amount,
-      vencimento: dto.due_date,
+      vencimento: dto.type === "pixCashin" ? dto.due_date : undefined,
       descricao: dto.description,
       texto_instrucao: dto.instruction,
       tipo_transacao: dto.type,
@@ -106,7 +88,6 @@ export class ChargeService {
   async findAll(userId: string) {
     const charges = await this.chargeRepository.find({
       where: { user: { id: userId } },
-      relations: ['user'],
     });
 
     return charges;
