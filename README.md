@@ -75,7 +75,6 @@ Após configurar o `.env` do backend, certifique-se de que o banco de dados MySQ
 Para criar as tabelas e estruturar o banco, execute as migrations do TypeORM no diretório `back`:
 
 ```bash
-cd back
 npm run migration:run
 ```
 
