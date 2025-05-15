@@ -1,40 +1,54 @@
-import { Body, Controller, Post, Res, UsePipes } from '@nestjs/common';
+import {
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
-import { ZodValidationPipe } from 'src/pipes/zod-validation.pipe';
-import { LoginDTO, LoginSchema } from './dto/login.dto';
-import { CreateUserDTO, CreateUserSchema } from 'src/user/dto/create-user.dto';
+import { User } from 'src/user/entities/user.entity';
+import { CurrentUser } from './decorators/get-current-user';
+import { LocalAuthGuard } from './guards/local.guard';
+import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('signup')
-  @UsePipes(new ZodValidationPipe(CreateUserSchema))
-  async signup(@Body() signupDTO: CreateUserDTO) {
-    console.log(signupDTO);
-    return await this.authService.signup(signupDTO);
-  }
+  // @Post('signup')
+  // @HttpCode(HttpStatus.CREATED)
+  // @UsePipes(new ZodValidationPipe(CreateUserSchema))
+  // async signup(@Body() signupDTO: CreateUserDTO) {
+  //   return await this.authService.signup(signupDTO);
+  // }
 
   @Post('signin')
-  @UsePipes(new ZodValidationPipe(LoginSchema))
-  async sigin(@Body() loginDTO: LoginDTO, @Res() res: Response) {
-    const { access_token, refresh_token } =
-      await this.authService.signin(loginDTO);
-
-    res.setHeader('Set-Cookie', access_token);
-    res.setHeader('Set-Cookie', refresh_token);
-
-    return res.json({ access_token, refresh_token }).status(201);
+  @UseGuards(LocalAuthGuard)
+  @HttpCode(HttpStatus.CREATED)
+  async sigin(
+    @CurrentUser() user: User,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    await this.authService.signin(user, response);
   }
 
-  @Post('logout')
-  async logout() {
-    this.authService.logout();
-  }
+  // @Delete('logout')
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // async logout(@Req() req: Request) {
+  //   const user = req.user;
+
+  //   return this.authService.logout(user!['sub']);
+  // }
 
   @Post('refresh')
-  async refreshToken() {
-    this.authService.refreshTokens();
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtRefreshAuthGuard)
+  async refreshToken(
+    @CurrentUser() user: User,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    await this.authService.signin(user, response);
   }
 }

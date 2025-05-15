@@ -89,7 +89,7 @@ export class ChargeService {
       : data.id_invoice_pix_documento;
   }
 
-  async findAll(userId: string, token: string) {
+  async findAll() {
     const allChargesOfUser = await this.chargeRepository.find();
 
     return allChargesOfUser;

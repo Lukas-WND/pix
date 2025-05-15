@@ -6,7 +6,7 @@ type Payload = {
 };
 
 export async function login(payload: Payload) {
-  const response = await api.post("/auth/login", payload);
+  const response = await api.post("/auth/signin", payload);
 
   return response;
 }

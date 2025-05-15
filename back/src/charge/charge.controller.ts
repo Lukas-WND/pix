@@ -8,14 +8,18 @@ import {
   Delete,
   UsePipes,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ChargeService } from './charge.service';
 import { CreateChargeDTO, CreateChargeSchema } from './dto/create-charge.dto';
 import { UpdateChargeDto } from './dto/update-charge.dto';
 import { ZodValidationPipe } from 'src/pipes/zod-validation.pipe';
 import { Request } from 'express';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { CurrentUser } from 'src/auth/decorators/get-current-user';
+import { User } from 'src/user/entities/user.entity';
 
-@Controller('charge')
+@Controller('charges')
 export class ChargeController {
   constructor(private readonly chargeService: ChargeService) {}
 
@@ -27,9 +31,10 @@ export class ChargeController {
   }
 
   @Get()
-  findAll(@Req() req: Request) {
-    const { token } = req.cookies;
-    return this.chargeService.findAll("d1fb8f22-3030-11f0-a6dc-0242ac170002", token);
+  @UseGuards(JwtAuthGuard)
+  findAll(@CurrentUser() user: User) {
+    console.log(user);
+    return this.chargeService.findAll();
   }
 
   @Get(':id')

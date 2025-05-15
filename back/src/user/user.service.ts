@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 
 @Injectable()
 export class UserService {
@@ -43,10 +43,22 @@ export class UserService {
     const user = await this.findOne(userId);
 
     if (user) {
-      user.hashedRt = hash;
+      user.refresh_token = hash;
     }
 
     return await this.userRepository.save(user!);
+  }
+
+  async deleteRtHash(userId: string) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId, refresh_token: Not(IsNull()) },
+    });
+
+    if (!user) throw new NotFoundException('Usuário não encontrado.');
+
+    user.refresh_token = '';
+
+    return await this.userRepository.save(user);
   }
 
   remove(id: number) {
