@@ -1,17 +1,12 @@
-
 # Integração Pix
 
 Projeto fullstack desenvolvido com NestJS (backend) e Next.js (frontend) para gerenciar cobranças via Pix, utilizando TypeORM com MySQL.
 
----
-
 ## Requisitos
 
-- Node.js >= 18.x  
-- npm  
-- Docker (para rodar imagem do banco de dados MySQL)  
-
----
+- Node.js >= 18.x
+- npm
+- Docker (para rodar imagem do banco de dados MySQL)
 
 ## Instalação
 
@@ -20,12 +15,15 @@ Projeto fullstack desenvolvido com NestJS (backend) e Next.js (frontend) para ge
 ```bash
 git clone https://github.com/Lukas-WND/pix.git
 cd pix
+```
+
 
 2. Faça o build e inicie os containers Docker:
 
 ```bash
 docker-compose up -d --build
 ```
+
 
 3. Instale as dependências:
 
@@ -40,8 +38,6 @@ No diretório `front`:
 ```bash
 npm install
 ```
-
----
 
 ## Configuração das variáveis de ambiente
 
@@ -70,7 +66,6 @@ CANVI_PRIVATE_KEY="F7DD2108954105F0BF765DFFDB210C880101B4D107363F7DD2"
 NEXT_PUBLIC_URL="http://localhost:3000"
 ```
 
----
 
 ## Banco de dados e migrations
 
@@ -83,9 +78,10 @@ cd back
 npm run typeorm migration:run
 ```
 
+As migrations geram um usuário padrão, de username: admin e senha: canvi
+
 > **Nota:** Caso prefira, pode usar `synchronize: true` na configuração do TypeORM para criar as tabelas automaticamente, mas essa prática não é recomendada para produção.
 
----
 
 ## Executando o projeto
 
@@ -111,26 +107,23 @@ npm run dev
 O frontend estará disponível em:
 `http://localhost`
 
----
 
 ## Tecnologias utilizadas
 
-* [NestJS](https://nestjs.com/)
-* [TypeORM](https://typeorm.io/)
-* MySQL
-* [Next.js](https://nextjs.org/)
-* Canvi API (simulação de pagamentos Pix)
+- [NestJS](https://nestjs.com/)
+- [TypeORM](https://typeorm.io/)
+- MySQL
+- [Next.js](https://nextjs.org/)
+- Canvi API (simulação de pagamentos Pix)
 
----
 
 ## Estrutura do projeto
 
-* `back/src/charge` - Módulo e serviços de cobranças Pix
-* `back/src/user` - Entidades e serviços de usuários
-* `back/src/canvi` - Integração com API Canvi para gerar cobranças
-* `front` - Aplicação React com Next.js para frontend
+- `back/src/charge` - Módulo e serviços de cobranças Pix
+- `back/src/user` - Entidades e serviços de usuários
+- `back/src/canvi` - Integração com API Canvi para gerar cobranças
+- `front` - Aplicação React com Next.js para frontend
 
----
 
 ## Contato
 
