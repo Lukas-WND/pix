@@ -104,9 +104,10 @@ npm run dev
 O frontend estará disponível em:
 `http://localhost`
 
-Acesse a rota `/login` manualmente no navegador para ser redirecionado para a tela de autenticação
+## Autenticação
+Acesse a rota `/login` manualmente no navegador para ser direcionado à tela de autenticação
 
-O usuário padrão criado anteriormente nas migrations é:
+O usuário padrão gerado a partir das migrations é:
 
 ```
 username: admin
