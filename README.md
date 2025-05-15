@@ -106,6 +106,13 @@ O frontend estará disponível em:
 
 Acesse a rota `/login` manualmente no navegador para ser redirecionado para a tela de autenticação
 
+O usuário padrão criado anteriormente nas migrations é:
+
+```
+username: admin
+senha: canvi
+```
+
 ## Tecnologias utilizadas
 
 - [NestJS](https://nestjs.com/)
