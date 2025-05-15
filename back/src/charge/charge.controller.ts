@@ -40,17 +40,19 @@ export class ChargeController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.chargeService.findOne(id);
+  @UseGuards(JwtAuthGuard)
+  findOne(@CurrentUser() user: User, @Param('id') id: string) {
+    return this.chargeService.findOne(user, id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateChargeDto: UpdateChargeDto) {
-    return this.chargeService.update(id, updateChargeDto);
+  @Post('simulate-payment/:id')
+  @UseGuards(JwtAuthGuard)
+  simulate(@CurrentUser() user: User, @Param('id') id: string) {
+    
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.chargeService.remove(+id);
+    return this.chargeService.remove(id);
   }
 }

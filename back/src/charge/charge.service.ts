@@ -1,20 +1,22 @@
 import {
+  BadGatewayException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { randomUUID } from 'crypto';
 
-import { Charge } from './entities/charge.entity';
 import { CreateChargeDTO } from './dto/create-charge.dto';
-import { UpdateChargeDto } from './dto/update-charge.dto';
-import { Type, Status } from './entities/charge.entity';
-import { UserService } from 'src/user/user.service';
-import { CanviService } from 'src/canvi/canvi.service';
-import { PreCharge } from 'src/canvi/types/pre-charge.type';
+
 import { User } from 'src/user/entities/user.entity';
+import { Charge, Type, Status } from './entities/charge.entity';
+
+import { PreCharge } from 'src/canvi/types/pre-charge.type';
+import { CanviService } from 'src/canvi/canvi.service';
+import { QueryPixResponse } from 'src/canvi/types/query-pix-response.type';
+import { GeneratePixResponse } from 'src/canvi/types/generate-pix-response.type';
+import { SimulatePixPayment } from 'src/canvi/types/simulate-payment.type';
 
 @Injectable()
 export class ChargeService {
@@ -22,54 +24,42 @@ export class ChargeService {
     @InjectRepository(Charge)
     private readonly chargeRepository: Repository<Charge>,
     private readonly canviService: CanviService,
-    private readonly userService: UserService,
   ) {}
 
-  async create(createChargeDTO: CreateChargeDTO, user: User) {
-    const token = await this.canviService.token(
-      user.client_id,
-      user.private_key,
-    );
-    const pre_charge = this.mapToPreCharge(createChargeDTO);
-
-    const generated_pix = await this.canviService.generatePix(
-      pre_charge,
-      token,
-    );
-
-    const id_pix = this.extractPixId(
-      pre_charge.tipo_transacao,
-      generated_pix.data,
-    );
-
-    const charge = this.chargeRepository.create({
-      amount: pre_charge.valor,
-      id_invoice: id_pix,
-      type:
-        pre_charge.tipo_transacao === 'pixCashin' ? Type.DINAMIC : Type.STATIC,
-      description: pre_charge.descricao,
-      instruction: pre_charge.texto_instrucao,
-      id_external: pre_charge.identificador_externo,
-      id_transaction: pre_charge.identificador_movimento,
-      due_date: pre_charge.vencimento,
-      status: Status.CREATED,
-      qr_code: generated_pix.data.qrcode,
-      user: user,
-    });
-
-    await this.chargeRepository.save(charge);
-
-    return {
-      id_invoice: charge.id_invoice,
-      brcode: generated_pix.data.brcode,
-      qrcode: generated_pix.data.qrcode,
-    };
+  private async queryChargeDetails(charge: Charge, token: string) {
+    return charge.type === Type.DINAMIC
+      ? this.canviService.queryDinamicCharge(charge.id_invoice, token)
+      : this.canviService.queryStaticCharge(charge.id_invoice, token);
   }
 
-  private mapToPreCharge(dto: CreateChargeDTO): PreCharge {
+  private mapApiStatus(apiStatus: string): Status {
+    switch (apiStatus) {
+      case 'created':
+        return Status.CREATED;
+      case 'expired':
+        return Status.EXPIRED;
+      case 'paid':
+        return Status.PAID;
+      default:
+        return Status.CREDITED;
+    }
+  }
+
+  private extractPixId(
+    tipoTransacao: string,
+    data: GeneratePixResponse['data'],
+  ): number | null {
+    if (tipoTransacao === 'pixCashin') {
+      return data.id_invoice_pix ?? null;
+    } else {
+      return data.id_invoice_pix_documento ?? null;
+    }
+  }
+
+  private toPreChargeDTO(dto: CreateChargeDTO): PreCharge {
     return {
       valor: dto.amount,
-      vencimento: dto.type === "pixCashin" ? dto.due_date : undefined,
+      vencimento: dto.type === 'pixCashin' ? dto.due_date : undefined,
       descricao: dto.description,
       texto_instrucao: dto.instruction,
       tipo_transacao: dto.type,
@@ -79,40 +69,124 @@ export class ChargeService {
     };
   }
 
-  private extractPixId(tipo_transacao: string, data: any): number {
-    return tipo_transacao === 'pixCashin'
-      ? data.id_invoice_pix
-      : data.id_invoice_pix_documento;
+  private async getToken(user: User) {
+    return this.canviService.token(user.client_id, user.private_key);
   }
 
-  async findAll(userId: string) {
-    const charges = await this.chargeRepository.find({
-      where: { user: { id: userId } },
-    });
+  private parseQrCode(qrcode: QueryPixResponse['qrcode']): string | null {
+    if (!qrcode.data) return null;
 
-    return charges;
+    const buffer = Buffer.from(qrcode.data);
+    return buffer.toString('utf-8');
   }
 
-  async findOne(id: string) {
+  private async findChargeById(id: string) {
     const charge = await this.chargeRepository.findOneBy({ id });
     if (!charge) {
-      throw new InternalServerErrorException(`Charge #${id} não encontrada`);
+      throw new NotFoundException(`Cobrança #${id} não encontrada`);
     }
+
     return charge;
   }
 
-  async update(id: string, updateChargeDto: UpdateChargeDto) {
-    await this.chargeRepository.update(id, updateChargeDto);
-    return this.findOne(id);
+  async findAll(userId: string): Promise<Charge[]> {
+    return await this.chargeRepository.find({
+      where: { user: { id: userId } },
+      order: { created_at: 'DESC' },
+    });
   }
 
-  async remove(id: number) {
+  async create(createChargeDTO: CreateChargeDTO, user: User) {
+    const token = await this.getToken(user);
+    const preCharge = this.toPreChargeDTO(createChargeDTO);
+    const generatedPix = await this.canviService.generateCharge(
+      preCharge,
+      token,
+    );
+    const idPix = this.extractPixId(
+      preCharge.tipo_transacao,
+      generatedPix.data,
+    );
+
+    if (!idPix) {
+      throw new BadGatewayException(
+        'Erro ao recuperar dados do serviço de pagamentos',
+      );
+    }
+
+    const charge = this.chargeRepository.create({
+      amount: preCharge.valor,
+      id_invoice: idPix,
+      type:
+        preCharge.tipo_transacao === 'pixCashin' ? Type.DINAMIC : Type.STATIC,
+      description: preCharge.descricao,
+      instruction: preCharge.texto_instrucao,
+      id_external: preCharge.identificador_externo,
+      id_transaction: preCharge.identificador_movimento,
+      due_date: preCharge.vencimento,
+      status: Status.CREATED,
+      user,
+    });
+
+    return this.chargeRepository.save(charge);
+  }
+
+  async findOne(user: User, id: string) {
+    const charge = await this.findChargeById(id);
+    if (!charge) {
+      throw new NotFoundException(`Cobrança #${id} não encontrada`);
+    }
+
+    const token = await this.getToken(user);
+    const apiDetails = await this.queryChargeDetails(charge, token);
+
+    return {
+      status: this.mapApiStatus(apiDetails.status),
+      br_code: apiDetails.brcode,
+      qr_code: this.parseQrCode(apiDetails.qrcode),
+    };
+  }
+
+  async remove(id: string) {
     const result = await this.chargeRepository.delete(id);
+
     if (result.affected === 0) {
-      throw new InternalServerErrorException(
-        `Charge #${id} não encontrada para remoção`,
+      throw new NotFoundException(
+        `Cobrança #${id} não encontrada para remoção`,
       );
     }
     return { message: `Charge #${id} removida com sucesso` };
+  }
+
+  async simulatePayment(user: User, id: string) {
+    const charge = await this.findChargeById(id);
+
+    if (!charge) {
+      throw new NotFoundException(`Cobrança #${id} não encontrada`);
+    }
+
+    const token = await this.getToken(user);
+
+    const paymentPayload: SimulatePixPayment = {
+      id: charge.id_invoice,
+      tipo_transacao:
+        charge.type === Type.DINAMIC ? 'pixCashin' : 'pixStaticCashin',
+      pix: {
+        pagamento: {
+          valor: charge.amount.toString(),
+          pagador: {
+            id: '012.345.678-90',
+            nome: 'Cliente Pagador',
+          },
+        },
+      },
+    };
+
+    const payment_data = await this.canviService.simulateDinamicPayment(
+      paymentPayload,
+      token,
+    );
+
+    return payment_data;
   }
 }

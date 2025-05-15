@@ -7,15 +7,19 @@ import {
 } from "@/components/ui/card";
 import { ViewCharge } from "../query/get-all-charges";
 import { ChargeStatus } from "./charge-status";
+import ChargeDetailsDialog from "./charge-details-dialog";
 
 const Type = ["Estático", "Dinâmico"];
 
 export function ChargesCard({ charge }: { charge: ViewCharge }) {
   return (
     <Card className="w-full bg-slate-50">
-      <CardHeader>
-        <CardTitle>{charge.description}</CardTitle>
+      <CardHeader className="w-full relative">
+        <CardTitle>
+          <p>{charge.description}</p>
+        </CardTitle>
         <CardDescription className="text-sm">{charge.id}</CardDescription>
+        <ChargeDetailsDialog chargeId={charge.id} />
       </CardHeader>
       <CardContent>
         <div className="w-full grid grid-cols-4 justify-between">

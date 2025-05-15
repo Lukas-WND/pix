@@ -13,6 +13,7 @@ export enum Status {
   CREATED = 0,
   EXPIRED = 1,
   PAID = 2,
+  CREDITED = 3,
 }
 
 export enum Type {
@@ -50,7 +51,7 @@ export class Charge {
   @Column({ type: 'char', length: 36, unique: true })
   id_transaction: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   due_date: Date;
 
   @Column({
@@ -72,11 +73,8 @@ export class Charge {
   @Column({ nullable: true })
   customer_doc_value?: string;
 
-  @Column({ type: 'blob', nullable: false })
-  qr_code: string;
-
   @ManyToOne(() => User, (user) => user.charges)
-  @JoinColumn({name: 'id_user'})
+  @JoinColumn({ name: 'id_user' })
   user: User;
 
   @CreateDateColumn()
