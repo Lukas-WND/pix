@@ -17,12 +17,17 @@ import { CanviService } from 'src/canvi/canvi.service';
 import { QueryPixResponse } from 'src/canvi/types/query-pix-response.type';
 import { GeneratePixResponse } from 'src/canvi/types/generate-pix-response.type';
 import { SimulatePixPayment } from 'src/canvi/types/simulate-payment.type';
+import { ChargeHistory } from './entities/history.entity';
 
 @Injectable()
 export class ChargeService {
   constructor(
     @InjectRepository(Charge)
     private readonly chargeRepository: Repository<Charge>,
+
+    @InjectRepository(ChargeHistory)
+    private readonly historyRespository: Repository<ChargeHistory>,
+
     private readonly canviService: CanviService,
   ) {}
 
@@ -89,6 +94,28 @@ export class ChargeService {
     return charge;
   }
 
+  private async createHistory(user: User, charge: Charge) {
+    const history = this.historyRespository.create({
+      id_charge: charge.id,
+      id_invoice: charge.id_invoice,
+      type: charge.type,
+      amount: charge.amount,
+      description: charge.description,
+      instruction: charge.instruction,
+      id_external: charge.id_external,
+      id_transaction: charge.id_transaction,
+      due_date: charge.due_date,
+      status: charge.status,
+      customer_name: charge.customer_name,
+      customer_email: charge.customer_email,
+      customer_doc_type: charge.customer_doc_type,
+      customer_doc_value: charge.customer_doc_value,
+      user: user.id,
+    });
+
+    return await this.historyRespository.save(history);
+  }
+
   async findAll(userId: string): Promise<Charge[]> {
     return await this.chargeRepository.find({
       where: { user: { id: userId } },
@@ -128,7 +155,11 @@ export class ChargeService {
       user,
     });
 
-    return this.chargeRepository.save(charge);
+    const chargeSaved = await this.chargeRepository.save(charge);
+
+    await this.createHistory(user, chargeSaved);
+
+    return chargeSaved;
   }
 
   async findOne(user: User, id: string) {
@@ -183,15 +214,15 @@ export class ChargeService {
       },
     };
 
-    const payment_response_code = await this.canviService.simulateDinamicPayment(
-      paymentPayload,
-      token,
-    );
+    const payment_response_code =
+      await this.canviService.simulateDinamicPayment(paymentPayload, token);
 
-    if(payment_response_code === 200) {
+    if (payment_response_code === 200) {
       charge.status = Status.PAID;
       await this.chargeRepository.save(charge);
     }
+
+    await this.createHistory(user, charge);
 
     return charge;
   }

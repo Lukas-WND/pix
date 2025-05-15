@@ -92,7 +92,7 @@ export function LoginForm({
               <FormItem>
                 <FormLabel>Senha</FormLabel>
                 <FormControl>
-                  <Input placeholder="exemplo123" {...field} />
+                  <Input placeholder="exemplo123" type="password" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

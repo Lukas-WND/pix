@@ -68,7 +68,7 @@ export class ChargeHistory {
   @Column({ nullable: true })
   customer_doc_value?: string;
 
-  @Column()
+  @Column({ name: 'id_user' })
   user: string;
 
   @CreateDateColumn()

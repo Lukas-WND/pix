@@ -6,7 +6,7 @@ import { ChargesCard } from "./charge-card";
 
 export function ChargesList() {
   const charges = useQuery({
-    queryKey: ["all-charges"],
+    queryKey: ["charges"],
     queryFn: getAllCharges,
   });
 

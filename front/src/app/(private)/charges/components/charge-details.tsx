@@ -72,7 +72,7 @@ export function ChargeDetails({
         >
           Fechar
         </Button>
-        <SimulatePaymentButton chargeId={charge.id} />
+        <SimulatePaymentButton chargeId={charge.id} setOpen={setOpen}/>
       </div>
     </div>
   );

@@ -32,6 +32,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { createCharge } from "../query/create-charge-mutation";
 import { toast } from "sonner";
+import { queryClient } from "@/lib/react-query";
 
 export function CreateChargeForm({
   setOpen,
@@ -73,6 +74,7 @@ export function CreateChargeForm({
   const create_charge_mutation = useMutation({
     mutationFn: createCharge,
     onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['charges']});
       toast.success("Cobrança criada com sucesso.");
       setOpen(false);
     },
