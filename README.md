@@ -17,13 +17,11 @@ git clone https://github.com/Lukas-WND/pix.git
 cd pix
 ```
 
-
 2. Faça o build e inicie os containers Docker:
 
 ```bash
 docker-compose up -d --build
 ```
-
 
 3. Instale as dependências:
 
@@ -38,6 +36,7 @@ No diretório `front`:
 ```bash
 npm install
 ```
+
 > **Nota:** É possível que, graças às versões das dependências da biblioteca de UI utilizada no projeto, ocorra algum erro ao tentar instalar as dependências somente com `npm install`, mas pode ser facilmente contornado utilizando o comando `npm install --legacy-peer-deps` ou mesmo o `npm install --force`.
 
 ## Configuração das variáveis de ambiente
@@ -67,7 +66,6 @@ CANVI_PRIVATE_KEY="F7DD2108954105F0BF765DFFDB210C880101B4D107363F7DD2"
 NEXT_PUBLIC_URL="http://localhost:3000"
 ```
 
-
 ## Banco de dados e migrations
 
 Após configurar o `.env` do backend, certifique-se de que o banco de dados MySQL está rodando (via Docker ou localmente).
@@ -81,7 +79,6 @@ npm run migration:run
 As migrations geram um usuário padrão, de username: admin e senha: canvi
 
 > **Nota:** Caso prefira, pode usar `synchronize: true` na configuração do TypeORM para criar as tabelas automaticamente, mas essa prática não é recomendada para produção.
-
 
 ## Executando o projeto
 
@@ -107,6 +104,7 @@ npm run dev
 O frontend estará disponível em:
 `http://localhost`
 
+Acesse a rota `/login` manualmente no navegador para ser redirecionado para a tela de autenticação
 
 ## Tecnologias utilizadas
 
@@ -116,14 +114,12 @@ O frontend estará disponível em:
 - [Next.js](https://nextjs.org/)
 - Canvi API (simulação de pagamentos Pix)
 
-
 ## Estrutura do projeto
 
 - `back/src/charge` - Módulo e serviços de cobranças Pix
 - `back/src/user` - Entidades e serviços de usuários
 - `back/src/canvi` - Integração com API Canvi para gerar cobranças
 - `front` - Aplicação React com Next.js para frontend
-
 
 ## Contato
 
