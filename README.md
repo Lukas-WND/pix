@@ -38,6 +38,7 @@ No diretório `front`:
 ```bash
 npm install
 ```
+> **Nota:** É possível que, graças às versões das dependências da biblioteca de UI utilizada no projeto, ocorra algum erro ao tentar instalar as dependências somente com `npm install`, mas pode ser facilmente contornado utilizando o comando `npm install --legacy-peer-deps` ou mesmo o `npm install --force`.
 
 ## Configuração das variáveis de ambiente
 
@@ -75,7 +76,7 @@ Para criar as tabelas e estruturar o banco, execute as migrations do TypeORM no 
 
 ```bash
 cd back
-npm run typeorm migration:run
+npm run migration:run
 ```
 
 As migrations geram um usuário padrão, de username: admin e senha: canvi
