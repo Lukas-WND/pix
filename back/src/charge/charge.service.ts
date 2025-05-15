@@ -141,6 +141,7 @@ export class ChargeService {
     const apiDetails = await this.queryChargeDetails(charge, token);
 
     return {
+      id: charge.id,
       status: this.mapApiStatus(apiDetails.status),
       br_code: apiDetails.brcode,
       qr_code: this.parseQrCode(apiDetails.qrcode),
@@ -182,11 +183,16 @@ export class ChargeService {
       },
     };
 
-    const payment_data = await this.canviService.simulateDinamicPayment(
+    const payment_response_code = await this.canviService.simulateDinamicPayment(
       paymentPayload,
       token,
     );
 
-    return payment_data;
+    if(payment_response_code === 200) {
+      charge.status = Status.PAID;
+      await this.chargeRepository.save(charge);
+    }
+
+    return charge;
   }
 }

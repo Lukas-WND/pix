@@ -18,6 +18,10 @@ import { Request } from 'express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUser } from 'src/auth/decorators/get-current-user';
 import { User } from 'src/user/entities/user.entity';
+import {
+  SimulatePaymentSchema,
+  SimulatePaymentSchemaDTO,
+} from './dto/simulate-payment.dto';
 
 @Controller('charges')
 export class ChargeController {
@@ -45,10 +49,15 @@ export class ChargeController {
     return this.chargeService.findOne(user, id);
   }
 
-  @Post('simulate-payment/:id')
+  @Post('simulate-payment')
   @UseGuards(JwtAuthGuard)
-  simulate(@CurrentUser() user: User, @Param('id') id: string) {
-    
+  simulate(
+    @CurrentUser() user: User,
+    @Body(new ZodValidationPipe(SimulatePaymentSchema))
+    charge: SimulatePaymentSchemaDTO,
+  ) {
+    console.log(charge);
+    return this.chargeService.simulatePayment(user, charge.id);
   }
 
   @Delete(':id')

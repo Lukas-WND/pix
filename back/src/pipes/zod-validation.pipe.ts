@@ -15,7 +15,7 @@ export class ZodValidationPipe implements PipeTransform {
       return parsedValue;
     } catch (error) {
       // console.log('errors: ', error);
-      throw new BadRequestException(`Validação falhou: ${error}`);
+      throw new BadRequestException('Validação falhou.');
     }
   }
 }

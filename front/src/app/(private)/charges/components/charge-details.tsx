@@ -1,15 +1,25 @@
 import { Button } from "@/components/ui/button";
 import { CheckIcon, ClipboardIcon } from "lucide-react";
-import { useState } from "react";
+import React, { SetStateAction, useState } from "react";
 import { toast } from "sonner";
+import { SimulatePaymentButton } from "./simulate-payment";
 
 interface ViewChargeDetails {
+  id: string;
   status: number;
   qr_code: string;
   br_code: string;
 }
 
-export function ChargeDetails({ charge }: { charge: ViewChargeDetails }) {
+export function ChargeDetails({
+  charge,
+  isLoading,
+  setOpen,
+}: {
+  charge: ViewChargeDetails;
+  isLoading: boolean;
+  setOpen: React.Dispatch<SetStateAction<boolean>>;
+}) {
   const [copied, setCopied] = useState(false);
 
   const copy_code = async () => {
@@ -24,7 +34,9 @@ export function ChargeDetails({ charge }: { charge: ViewChargeDetails }) {
     }
   };
 
-  return (
+  return isLoading ? (
+    "carregando.."
+  ) : (
     <div className="w-full">
       <img
         className="object-cover object-center w-full"
@@ -35,7 +47,10 @@ export function ChargeDetails({ charge }: { charge: ViewChargeDetails }) {
         <p className="break-all w-full p-2 border rounded-2xl">
           {charge.br_code}
         </p>
-        <Button className="flex gap-2 w-full" onClick={copy_code}>
+        <Button
+          className="flex gap-2 w-full bg-emerald-600"
+          onClick={copy_code}
+        >
           {copied ? (
             <>
               <CheckIcon size={3} />
@@ -48,6 +63,16 @@ export function ChargeDetails({ charge }: { charge: ViewChargeDetails }) {
             </>
           )}
         </Button>
+      </div>
+      <div className="mt-4 w-full flex gap-4">
+        <Button
+          variant={"outline"}
+          className="flex-1"
+          onClick={() => setOpen(false)}
+        >
+          Fechar
+        </Button>
+        <SimulatePaymentButton chargeId={charge.id} />
       </div>
     </div>
   );

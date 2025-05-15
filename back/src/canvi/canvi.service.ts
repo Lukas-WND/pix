@@ -60,15 +60,14 @@ export class CanviService {
   async simulateDinamicPayment(
     payment_data: SimulatePixPayment,
     token: string,
-  ) {
-    const data = await this.post<{ data: string }>(
+  ): Promise<number> {
+    const { code } = await this.post<{ code: number }>(
       'desenvolvedor/simular_baixa',
       payment_data,
       token,
     );
 
-    console.log('simulate', data)
-    return data;
+    return code;
   }
 
   private async post<T>(

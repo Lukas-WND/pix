@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTrigger,
 } from "@/components/ui/dialog";
@@ -13,6 +14,7 @@ import { EyeIcon } from "lucide-react";
 import { useState } from "react";
 import { getChargeDetails } from "../query/get-charge-details";
 import { ChargeDetails } from "./charge-details";
+import { SimulatePaymentButton } from "./simulate-payment";
 
 export default function ChargeDetailsDialog({
   chargeId,
@@ -30,7 +32,11 @@ export default function ChargeDetailsDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="absolute top-0 right-4" variant={"outline"} size={"icon"}>
+        <Button
+          className="absolute top-0 right-4"
+          variant={"outline"}
+          size={"icon"}
+        >
           <EyeIcon size={4} />
         </Button>
       </DialogTrigger>
@@ -41,11 +47,11 @@ export default function ChargeDetailsDialog({
             Veja abaixo os detalhes da cobrança:
           </DialogDescription>
         </DialogHeader>
-        {isLoading ? (
-          <p>Carregando...</p>
-        ) : (
-          charge && <ChargeDetails charge={charge} />
-        )}
+        <ChargeDetails
+          charge={charge}
+          isLoading={isLoading}
+          setOpen={setOpen}
+        />
       </DialogContent>
     </Dialog>
   );
