@@ -9,7 +9,7 @@ import { CreateUserDTO } from 'src/user/dto/create-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Tokens } from './types/tokens';
 import { User } from 'src/user/entities/user.entity';
-import { Response } from 'express';
+import { CookieOptions, Response } from 'express';
 import { JwtPayload } from './types/payload';
 
 @Injectable()
@@ -19,18 +19,23 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async getTokens(userId: string, email: string): Promise<Tokens> {
+  async getTokens(
+    userId: string,
+    email: string,
+    at_expires: number,
+    rt_expires: number,
+  ): Promise<Tokens> {
     const payload: JwtPayload = { userId, email };
 
     const [at, rt] = await Promise.all([
       await this.jwtService.signAsync(payload, {
         secret: process.env.AT_SECRET_KEY,
-        expiresIn: 60 * 15,
+        expiresIn: at_expires,
       }),
 
       await this.jwtService.signAsync(payload, {
         secret: process.env.RT_SECRET_KEY,
-        expiresIn: 60 * 60 * 24,
+        expiresIn: rt_expires,
       }),
     ]);
 
@@ -61,56 +66,64 @@ export class AuthService {
     }
   }
 
-  async signin(user: User, response: Response) {
-    const expiresAccessToken = new Date();
-    expiresAccessToken.setMilliseconds(
-      expiresAccessToken.getTime() + 1000 * 60 * 15,
-    );
+  private cookieConfig(expires?: Date): CookieOptions {
+    return {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      expires,
+    };
+  }
 
-    const expiresRefreshToken = new Date();
-    expiresRefreshToken.setMilliseconds(
-      expiresRefreshToken.getTime() + 1000 * 60 * 60 * 24,
-    );
+  private async setAuthCookies(user: User, response: Response) {
+    const at_expires = 1000 * 60 * 15;
+    const rt_expires = 1000 * 60 * 60 * 15;
+
+    const expiresAccessToken = new Date(Date.now() + at_expires);
+    const expiresRefreshToken = new Date(Date.now() + rt_expires);
 
     const { access_token, refresh_token } = await this.getTokens(
       user.id,
       user.email,
+      at_expires / 1000,
+      rt_expires / 1000,
     );
 
     await this.updateRtHash(user.id, refresh_token);
 
-    response.cookie('Authentication', access_token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
-      expires: expiresAccessToken,
-    });
-
-    response.cookie('Refresh', refresh_token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
-      expires: expiresRefreshToken,
-    });
+    response.cookie(
+      'Authentication',
+      access_token,
+      this.cookieConfig(expiresAccessToken),
+    );
+    response.cookie(
+      'Refresh',
+      refresh_token,
+      this.cookieConfig(expiresRefreshToken),
+    );
   }
 
-  async signup(signupDTO: CreateUserDTO): Promise<Tokens> {
+  async signin(user: User, response: Response) {
+    await this.setAuthCookies(user, response);
+  }
+
+  async signup(signupDTO: CreateUserDTO, response: Response) {
     const hashPassword = await hash(signupDTO.password, 10);
 
-    const newUser = await this.userService.create({
+    const newUser = (await this.userService.create({
       ...signupDTO,
       password: hashPassword,
-    });
+    })) as User;
 
-    const tokens = await this.getTokens(newUser.id, newUser.email);
-    await this.updateRtHash(newUser.id, tokens.refresh_token);
-    return tokens;
+    await this.setAuthCookies(newUser, response);
   }
 
-  async logout(userId: string) {
-    const user = await this.userService.deleteRtHash(userId);
+  async logout(user: User, response: Response) {
+    await this.userService.deleteRtHash(user.id);
 
-    return user;
+    response.clearCookie('Authentication', this.cookieConfig());
+    response.clearCookie('Refresh', this.cookieConfig());
   }
 
   async validateUserRefreshToken(refreshToken: string, userId: string) {

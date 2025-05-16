@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isTokenExpired } from "./lib/validate-token";
 
 const PublicRoutes = [
   { path: "/", auth_redirect: false },
@@ -48,6 +49,12 @@ export function middleware(request: NextRequest) {
 
   if (access_token && !public_route) {
     // checar se o JWT não expirou
+    if (isTokenExpired(access_token.value)) {
+      const redirect = request.nextUrl.clone();
+      redirect.pathname = REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE;
+      return NextResponse.redirect(redirect);
+    }
+
     return NextResponse.next();
   }
 

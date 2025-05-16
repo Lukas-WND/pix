@@ -10,6 +10,7 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
+        console.log('refresh')
         const response = await api.post("auth/refresh");
 
         if (response.status === 201) return api(originalRequest);
@@ -17,7 +18,10 @@ api.interceptors.response.use(
         throw new Error(response.data.message);
       } catch (refreshError: any) {
         toast.error(refreshError.message);
-        window.location.href = "/login";
+        console.log('erro')
+        await api.delete("auth/logout");
+
+        window.location.href = "/signin";
       }
     }
 

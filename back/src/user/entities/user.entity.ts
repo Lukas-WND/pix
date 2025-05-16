@@ -20,7 +20,7 @@ export class User {
   @Column({ nullable: false, unique: true })
   username: string;
 
-  @Column({ unique: true })
+  @Column({ nullable: false, unique: true })
   email: string;
 
   @Column()
@@ -28,6 +28,7 @@ export class User {
   password: string;
 
   @Column({ nullable: true })
+  @Exclude()
   refresh_token: string;
 
   @Column({ nullable: false, unique: true })
