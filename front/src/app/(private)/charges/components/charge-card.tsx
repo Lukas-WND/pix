@@ -13,7 +13,7 @@ const Type = ["Estático", "Dinâmico"];
 
 export function ChargesCard({ charge }: { charge: ViewCharge }) {
   return (
-    <Card className="w-full bg-slate-50">
+    <Card className="w-full">
       <CardHeader className="w-full relative">
         <CardTitle>
           <p>{charge.description}</p>
