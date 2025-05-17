@@ -1,9 +1,13 @@
 import { Button } from "@/components/ui/button";
+import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { ChevronsUpDown, GalleryVerticalEndIcon } from "lucide-react";
 
 export function CompanyLogo() {
   return (
-    <div className="flex gap-2 p-2">
+    <SidebarMenuButton
+      size="lg"
+      className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+    >
       <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
         <GalleryVerticalEndIcon className="size-4" />
       </div>
@@ -11,6 +15,6 @@ export function CompanyLogo() {
         <span className="truncate font-semibold">Canvi Billing</span>
         <span className="truncate text-xs">Enterprise</span>
       </div>
-    </div>
+    </SidebarMenuButton>
   );
 }
