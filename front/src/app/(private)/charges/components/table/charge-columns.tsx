@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Charge } from "../interfaces/charge.interface";
-import Actions from "./actions/dropdown";
+import { Charge } from "../../interfaces/charge.interface";
+import Actions from "./dropdown-actions";
 
 export const columns: ColumnDef<Charge>[] = [
   {
@@ -60,6 +60,13 @@ export const columns: ColumnDef<Charge>[] = [
   {
     accessorKey: "due_date",
     header: "Vencimento",
+    cell: ({ row }) => {
+      const due_date = row.original.due_date;
+
+      return due_date
+        ? new Date(due_date).toLocaleDateString("pt-br")
+        : undefined;
+    },
   },
   {
     id: "actions",

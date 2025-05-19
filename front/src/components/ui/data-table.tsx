@@ -251,7 +251,7 @@ export default function DataTable<TData, TValue>({
       </div>
       <div className="rounded-md border overflow-hidden">
         <Table>
-          <TableHeader className="bg-custom-blue">
+          <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="rounded">
                 {headerGroup.headers.map((header) => (
@@ -273,7 +273,7 @@ export default function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className="hover:bg-slate-100/50"
+                  className="hover:bg-muted/80"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -303,13 +303,6 @@ export default function DataTable<TData, TValue>({
           <PaginationComponent pagination={pagination} />
         </div>
       )}
-      {/* <pre>
-        {JSON.stringify(
-          { columnFilters: table.getState().columnFilters },
-          null,
-          2
-        )}
-      </pre> */}
     </div>
   );
 }

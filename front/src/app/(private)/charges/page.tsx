@@ -1,11 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ChargesList } from "./components/charges-list";
-import { CreateChargeDialog } from "./components/create-charge-dialog";
 import { getAllCharges } from "./query/get-all-charges";
 import { ChargesTable } from "./components/table/charges-table";
 import { ChargePageSkeleton } from "./components/skeletons/page-skeleton";
+import { SectionCards } from "./components/section-cards";
 
 export default function ChargesPage() {
   const { data: charges, isLoading } = useQuery({
@@ -19,11 +18,7 @@ export default function ChargesPage() {
         <ChargePageSkeleton />
       ) : (
         <div className="p-4 flex flex-col gap-6 h-full">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 basis-1/5">
-            <section className="bg-red-300 w-full"></section>
-            <section className="bg-red-300 w-full"></section>
-            <section className="bg-red-300 w-full"></section>
-          </div>
+          <SectionCards classname="basis-1/5"/>
           <section className="w-full basis-4/5">
             <ChargesTable charges={charges || []} />
           </section>
