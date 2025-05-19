@@ -29,6 +29,7 @@ export class AuthController {
     @Res() response: Response,
   ) {
     await this.authService.signup(signupDTO, response);
+    response.end();
   }
 
   @Post('signin')
@@ -39,6 +40,7 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     await this.authService.signin(user, response);
+    response.end();
   }
 
   @Post('refresh')
@@ -49,6 +51,7 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     await this.authService.signin(user, response);
+    response.end();
   }
 
   @Delete('logout')
@@ -56,5 +59,6 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(@CurrentUser() user: User, @Res() res: Response) {
     await this.authService.logout(user, res);
+    res.end();
   }
 }

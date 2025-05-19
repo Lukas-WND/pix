@@ -23,8 +23,6 @@ export default function ViewChargeDialog() {
 
   const router = useRouter();
 
-  const { copy, copied } = useCopyToClipboard();
-
   const { data: charge, isLoading } = useQuery({
     queryKey: ["charge-details"],
     queryFn: () => getChargeDetails(id),
@@ -32,6 +30,8 @@ export default function ViewChargeDialog() {
   });
 
   const handleClose = () => router.back();
+
+  const { copy, copied } = useCopyToClipboard(charge?.brcode);
 
   return (
     <Dialog open onOpenChange={handleClose}>
@@ -47,11 +47,11 @@ export default function ViewChargeDialog() {
         ) : (
           <div>
             <img
-              className="object-cover object-center w-full"
+              className="object-cover object-center w-full rounded-2xl"
               src={charge?.qrcode}
               alt="qr code para pagamento"
             />
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 mt-2">
               <p className="break-all w-full p-2 border rounded-2xl">
                 {charge?.brcode}
               </p>

@@ -25,8 +25,26 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useMutation } from "@tanstack/react-query";
+import { logout } from "../actions/logout";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function NavUser() {
+  const router = useRouter();
+
+  const logoutMutation = useMutation({
+    mutationKey: ["logout"],
+    mutationFn: logout,
+    onSuccess: () => {
+      toast.success("Logout realizado com sucesso.");
+      router.push("/signin");
+    },
+    onError: () => {
+      toast.error("Erro ao realizar logout.");
+    },
+  });
+
   const user = {
     name: "Lukas",
     avatar: "/avatar",
@@ -95,7 +113,7 @@ export function NavUser() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => logoutMutation.mutate()}>
               <LogOut />
               Log out
             </DropdownMenuItem>
