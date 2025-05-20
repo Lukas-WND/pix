@@ -1,27 +1,69 @@
 import { api } from "./api.config";
 import { toast } from "sonner";
 
+// Evita loop de logout recursivo
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+
+  failedQueue = [];
+};
+
 api.interceptors.response.use(
-  (respose) => respose,
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response.status === 401 && !originalRequest._retry) {
+    // Se a resposta foi 401 e ainda não tentamos refresh
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url.includes("/auth/refresh")
+    ) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(() => api(originalRequest))
+          .catch((err) => Promise.reject(err));
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
-        console.log('refresh')
-        const response = await api.post("auth/refresh");
+        const response = await api.post("/auth/refresh");
 
-        if (response.status === 201) return api(originalRequest);
+        isRefreshing = false;
+        processQueue(null);
 
-        throw new Error(response.data.message);
+        console.log('refreshou')
+        return api(originalRequest);
       } catch (refreshError: any) {
-        toast.error(refreshError.message);
-        console.log('erro')
-        await api.delete("auth/logout");
+        isRefreshing = false;
+        processQueue(refreshError);
 
+        // Evita loop chamando logout -> 401 de novo
+        if (!originalRequest.url.includes("/auth/logout")) {
+          try {
+            await fetch("/auth/logout", { method: "DELETE", credentials: "include" });
+          } catch (e) {
+            console.error("Erro ao deslogar após falha no refresh:", e);
+          }
+        }
+
+        toast.error("Sessão expirada. Faça login novamente.");
         window.location.href = "/signin";
+
+        return Promise.reject(refreshError);
       }
     }
 

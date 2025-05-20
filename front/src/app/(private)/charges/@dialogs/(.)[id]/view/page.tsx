@@ -24,7 +24,7 @@ export default function ViewChargeDialog() {
   const router = useRouter();
 
   const { data: charge, isLoading } = useQuery({
-    queryKey: ["charge-details"],
+    queryKey: ["charge-details", id],
     queryFn: () => getChargeDetails(id),
     enabled: !!id,
   });

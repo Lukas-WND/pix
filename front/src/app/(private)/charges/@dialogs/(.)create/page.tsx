@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
+import { CreateChargeForm } from "../../components/create-charge-form";
 // import { CreateChargeForm } from "../../components/create-charge-form";
 
 export default function CreateChargeDialog() {
@@ -25,7 +26,7 @@ export default function CreateChargeDialog() {
           </DialogDescription>
         </DialogHeader>
 
-        {/* <CreateChargeForm handleClose={handleClose} /> */}
+        <CreateChargeForm handleClose={handleClose} />
       </DialogContent>
     </Dialog>
   );
