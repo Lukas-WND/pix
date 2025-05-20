@@ -3,6 +3,7 @@ import { CreateUserDTO } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { IsNull, Not, Repository } from 'typeorm';
+import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -14,7 +15,9 @@ export class UserService {
   async create(createUserDto: CreateUserDTO) {
     const newUser = this.userRepository.create(createUserDto);
 
-    return await this.userRepository.save(newUser);
+    const user = await this.userRepository.save(newUser);
+
+    return instanceToPlain(user);
   }
 
   findAll() {
@@ -23,7 +26,10 @@ export class UserService {
 
   async findOne(id: string) {
     try {
-      return await this.userRepository.findOne({ where: { id }, relations: ['charges'] });
+      return await this.userRepository.findOne({
+        where: { id },
+        relations: ['charges'],
+      });
     } catch (Err) {
       throw new NotFoundException('Usuário não encontrado');
     }

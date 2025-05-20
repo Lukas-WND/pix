@@ -22,18 +22,12 @@ import { useMutation } from "@tanstack/react-query";
 import { login } from "../query/login-mutation";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { LoginDTO, LoginSchema } from "../interfaces/signin.interface";
 
 export function LoginForm({
   className,
 }: React.ComponentPropsWithoutRef<"form">) {
   const router = useRouter();
-
-  const LoginSchema = z.object({
-    username: z.string().min(1, { message: "Informe o nome de usuário" }),
-    password: z.string().min(1, { message: "Informe a senha" }),
-  });
-
-  type LoginDTO = z.infer<typeof LoginSchema>;
 
   const form = useForm<LoginDTO>({
     resolver: zodResolver(LoginSchema),
@@ -118,7 +112,7 @@ export function LoginForm({
         </div>
         <div className="text-center text-sm">
           Nâo possui uma conta?{" "}
-          <Link href="#" className="underline underline-offset-4">
+          <Link href="/signup" className="underline underline-offset-4">
             Cadastre-se
           </Link>
         </div>

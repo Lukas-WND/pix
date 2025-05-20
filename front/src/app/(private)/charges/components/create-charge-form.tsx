@@ -35,9 +35,9 @@ import { toast } from "sonner";
 import { queryClient } from "@/lib/react-query";
 
 export function CreateChargeForm({
-  setOpen,
+  handleClose,
 }: {
-  setOpen: React.Dispatch<SetStateAction<boolean>>;
+  handleClose: () => void;
 }) {
   const CreateChargeSchema = z.object({
     amount: z.coerce
@@ -76,7 +76,7 @@ export function CreateChargeForm({
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ['charges']});
       toast.success("Cobrança criada com sucesso.");
-      setOpen(false);
+      handleClose();
     },
     onError: (err) => {
       toast.error(err.message);
@@ -219,7 +219,7 @@ export function CreateChargeForm({
             type="button"
             variant={"outline"}
             className="flex-1"
-            onClick={() => setOpen(false)}
+            onClick={() => handleClose()}
           >
             Cancelar
           </Button>

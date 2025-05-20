@@ -174,8 +174,8 @@ export class ChargeService {
     return {
       id: charge.id,
       status: this.mapApiStatus(apiDetails.status),
-      br_code: apiDetails.brcode,
-      qr_code: this.parseQrCode(apiDetails.qrcode),
+      brcode: apiDetails.brcode,
+      qrcode: this.parseQrCode(apiDetails.qrcode),
     };
   }
 

@@ -25,7 +25,7 @@ export class CreateInitialTables1747341284574 implements MigrationInterface {
             isUnique: true,
             isNullable: false,
           },
-          { name: 'email', type: 'varchar', isUnique: true },
+          { name: 'email', type: 'varchar', isNullable: false, isUnique: true },
           { name: 'password', type: 'varchar' },
           { name: 'refresh_token', type: 'varchar', isNullable: true },
           {

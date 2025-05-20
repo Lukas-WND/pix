@@ -1,16 +1,29 @@
-import { ChargesList } from "./components/charges-list";
-import { CreateChargeDialog } from "./components/create-charge-dialog";
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { getAllCharges } from "./query/get-all-charges";
+import { ChargesTable } from "./components/table/charges-table";
+import { ChargePageSkeleton } from "./components/skeletons/page-skeleton";
+import { SectionCards } from "./components/section-cards";
 
 export default function ChargesPage() {
-    return (
-        <main className="w-full h-full flex flex-col items-center px-56 py-16">
-            <div className="w-full flex items-center justify-between">
-                <h1 className="text-3xl font-semibold">Cobranças</h1>
-                <CreateChargeDialog />
-            </div>
-            <section className="mt-8 w-full">
-                <ChargesList />
-            </section>
-        </main>
-    )
+  const { data: charges, isLoading } = useQuery({
+    queryKey: ["charges"],
+    queryFn: getAllCharges,
+  });
+
+  return (
+    <main className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min">
+      {isLoading ? (
+        <ChargePageSkeleton />
+      ) : (
+        <div className="p-4 flex flex-col gap-6 h-full">
+          <SectionCards classname="basis-1/5"/>
+          <section className="w-full basis-4/5">
+            <ChargesTable charges={charges || []} />
+          </section>
+        </div>
+      )}
+    </main>
+  );
 }
