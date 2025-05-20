@@ -26,19 +26,39 @@ export const columns: ColumnDef<Charge>[] = [
       const status = row.original.status;
 
       if (status === 0) {
-        return "Pendente";
+        return (
+          <div className="text-amber-600 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-600 inline-block" />
+            Pendente
+          </div>
+        );
       }
 
       if (status === 1) {
-        return "Expirado";
+        return (
+          <div className="text-rose-600 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-rose-600 inline-block" />
+            Expirado
+          </div>
+        );
       }
 
       if (status === 2) {
-        return "Pago";
+        return (
+          <div className="text-emerald-600 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-600 inline-block" />
+            Pago
+          </div>
+        );
       }
 
       if (status === 3) {
-        return "Creditado";
+        return (
+          <div className="text-sky-600 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-sky-600 inline-block" />
+            Creditado
+          </div>
+        );
       }
     },
   },

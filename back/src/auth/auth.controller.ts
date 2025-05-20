@@ -50,6 +50,7 @@ export class AuthController {
     @CurrentUser() user: User,
     @Res({ passthrough: true }) response: Response,
   ) {
+    console.log('refreshou');
     await this.authService.signin(user, response);
     response.end();
   }
